@@ -5,6 +5,7 @@ const UserModel = require("../models/User.model");
 const generateToken = require("../config/jwt.config");
 const isAuthenticated = require("../middlewares/isAuthenticated");
 const attachCurrentUser = require("../middlewares/attachCurrentUser");
+const isAdmin = require("../middlewares/isAdmin")
 
 const salt_rounds = 10;
 
@@ -125,9 +126,7 @@ router.get(
     try {
       const { id } = req.params;
       // Buscar o usuário no banco pelo id
-      const result = await UserModel.findOne({ _id: id }).populate(
-        "Audio"
-      );
+      const result = await UserModel.findOne({ _id: id }).populate("Audio");
       // Buscar o usuário logado que está disponível através do middleware attachCurrentUser
       const loggedInUser = req.currentUser;
       if (loggedInUser) {

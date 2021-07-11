@@ -28,7 +28,6 @@ router.post(
   "/audio",
   isAuthenticated,
   attachCurrentUser,
-  isAdmin,
   async (req, res) => {
     // Requisições do tipo POST tem uma propriedade especial chamada body, que carrega a informação enviada pelo cliente
     console.log(req.body);
@@ -164,6 +163,51 @@ router.delete(
       return res.status(200).json({});
     } catch (err) {
       console.error(err);
+      return res.status(500).json({ msg: JSON.stringify(err) });
+    }
+  }
+);
+
+router.post(
+  "/record/:id",
+  isAuthenticated,
+  attachCurrentUser,
+  isDoctor,
+  async (req, res) => {
+    // Requisições do tipo POST tem uma propriedade especial chamada body, que carrega a informação enviada pelo cliente
+    console.log(req.body);
+
+    try {
+      // Tira a propriedade image_url do objeto caso ela tenha um valor falso, para acionar o filtro de default value do Mongoose
+      if (!req.body.test_results) {
+        delete req.body.test_results;
+      }
+
+      // Transformando a lista de allergy numa array de strings
+      //   if (req.body.allergy) {
+      //     req.body.allergy = req.body.allergy.split(",");
+      //   }
+
+      //   if (req.body.medications) {
+      //     req.body.medications = req.body.medications.split(",");
+      //   }
+
+      // Salva os dados de usuário no banco de dados (MongoDB) usando o body da requisição como parâmetro
+      const result = await PatientRecord.create({
+        ...req.body,
+        patient_id: req.params.id,
+        created_by: req.currentUser._id,
+      });
+      const userRecord = await UserModel.findOneAndUpdate(
+        { _id: req.params.id },
+        { $push: { records: result._id } },
+        { new: true }
+      );
+      // Responder o usuário recém-criado no banco para o cliente (solicitante). O status 201 significa Created
+      return res.status(201).json(result);
+    } catch (err) {
+      console.error(err);
+      // O status 500 signifca Internal Server Error
       return res.status(500).json({ msg: JSON.stringify(err) });
     }
   }
