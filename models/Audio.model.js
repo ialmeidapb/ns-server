@@ -8,4 +8,4 @@ const AudioSchema = mongoose.Schema({
 
 });
 
-module.exports = mongoose.model("PatientRecord", AudioSchema);
+module.exports = mongoose.model("Audio", AudioSchema);

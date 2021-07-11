@@ -16,6 +16,7 @@ const UserSchema = new Schema({
     required: true,
     default: "USER",
   },
+  uploads: [{ type: Schema.Types.ObjectId, ref: "Audio" }],
 });
 
 const UserModel = model("User", UserSchema);
